@@ -42,7 +42,20 @@ const R_CON = UInt32[
     0x01000000 0x02000000 0x04000000 0x08000000 0x10000000 0x20000000 0x40000000 0x80000000 0x1b000000 0x36000000
 ]
 
+const Word = UInt32
+
+# Number of columns (32-bit words) comprising the State
+const N_K::UInt8 = 4
+# Number of 32-bit words comprising the Cipher Key
+const N_B::UInt = 4
+# Number of rounds, which is a function of Nk and Nb (which is fixed)
+const N_R::UInt = 10
+
 export S_BOX
 export INV_S_BOX
 export R_CON
+export Word
+export N_K
+export N_B
+export N_R
 end
