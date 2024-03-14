@@ -36,7 +36,7 @@ function expand_key(cipher_key::CipherKey, aes_key::AESKey)
         aes_key[i] = big_endian_to_native(cipher_key[(4 * (i - 1) + 1):(4 * i)])#Word(cipher_key[(4 * (i - 1) + 1):(4 * i)] |> be32)
         i += 1
     end
-
+    println(aes_key)
     i = N_K + 1
 
     while i <= N_B * (N_R + 1)
@@ -55,10 +55,8 @@ end
 function big_endian_to_native(endian_tuple::Tuple{UInt8,UInt8,UInt8,UInt8})::UInt32
     # Unpack the tuple into individual bytes
     byte1, byte2, byte3, byte4 = endian_tuple
-    
     # Concatenate the bytes into a big-endian 32-bit integer
-    big_endian_uint32 = (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4
-    
+    big_endian_uint32 = (UInt32(byte1) << 24) | (UInt32(byte2) << 16) | (UInt32(byte3) << 8) | UInt32(byte4)
     # Convert the big-endian integer to the system's native endianness
     return ntoh(big_endian_uint32)
 end
