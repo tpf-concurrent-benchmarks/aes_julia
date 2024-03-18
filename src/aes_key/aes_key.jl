@@ -3,10 +3,6 @@ module aes_key
 include("../constants.jl")
 using .constants
 
-using Pkg
-Pkg.add("StaticArrays")
-using StaticArrays
-
 const AESKey = Vector{Word}
 
 const CipherKey = NTuple{4 * N_K, UInt8}
