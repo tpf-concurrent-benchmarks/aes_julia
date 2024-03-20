@@ -25,3 +25,4 @@ using .state
 
 my_array::Vector{Word} = [123456789, 987654321, 11112222, 33334444]
 print(state.new_from_words(my_array))
+print("\n")
