@@ -26,4 +26,20 @@ function new_from_words(words::Vector{Word})
     return _state
 end
 
+function set_data_out(_state::State)
+    return reshape(_state, 1, Int(4 * N_B))
+end
+
+function sub_bytes(_state::State)
+    return apply_substitution(_state, S_BOX)
+end
+
+function inv_sub_bytes(_state::State)
+    return apply_substitution(_state, INV_S_BOX)
+end
+
+function apply_substitution(_state::State, sub_box::Vector{UInt8})
+    return map((value) -> sub_box[Int(value) + 1], _state)
+end
+
 end

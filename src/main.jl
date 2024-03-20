@@ -24,5 +24,10 @@ using .state
 
 
 my_array::Vector{Word} = [123456789, 987654321, 11112222, 33334444]
-print(state.new_from_words(my_array))
+st = state.new_from_words(my_array)
+print(st)
+print("\n")
+print(state.set_data_out(st))
+print("\n")
+print(state.inv_sub_bytes(state.sub_bytes(st)))
 print("\n")
