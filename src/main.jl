@@ -29,5 +29,21 @@ print(st)
 print("\n")
 print(state.set_data_out(st))
 print("\n")
-print(state.inv_sub_bytes(state.sub_bytes(st)))
+# print(state.inv_sub_bytes(state.sub_bytes(st)))
+# print("\n")
+print(state.sub_bytes(st))
+print("\n")
+print(st)
+print("\n")
+# print(state.inv_shift_rows(st))
+# print("\n")
+
+# round_key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c]
+# print(state.add_round_key(st, round_key))
+# print("\n")
+
+# print(st)
+# print("\n")
+
+print(state.galois_double(Int8(-72)))
 print("\n")
