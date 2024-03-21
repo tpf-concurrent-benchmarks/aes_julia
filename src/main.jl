@@ -47,3 +47,8 @@ print("\n")
 
 print(state.galois_double(Int8(-72)))
 print("\n")
+
+column::Vector{UInt8} = [0x2b, 0x28, 0xab, 0x09]
+state.mix_column(column)
+print(column)
+print("\n")
