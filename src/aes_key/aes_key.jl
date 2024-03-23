@@ -3,6 +3,9 @@ module aes_key
 include("../constants.jl")
 using .constants
 
+include("../state.jl")
+using .state
+
 const AESKey = Vector{Word}
 
 const CipherKey = NTuple{4 * N_K, UInt8}
@@ -11,6 +14,11 @@ const CipherKey = NTuple{4 * N_K, UInt8}
 function new_direct(cipher_key::CipherKey)
     aes_key = zeros(Word, N_B * (N_R + 1))
     return expand_key(cipher_key, aes_key)
+end
+
+function new_inverse(cipher_key::CipherKey)
+    aes_key = zeros(Word, N_B * (N_R + 1))
+    return inv_expand_key(cipher_key, aes_key)
 end
 
 function rot_word(word::Word)
@@ -46,9 +54,29 @@ function expand_key(cipher_key::CipherKey, aes_key::AESKey)
     return aes_key
 end
 
-function big_endian_to_native(endian_tuple::Tuple{UInt8,UInt8,UInt8,UInt8})::UInt32
-    # Unpack the tuple into individual bytes
-    byte1, byte2, byte3, byte4 = endian_tuple
+function inv_expand_key(cipher_key::CipherKey, dw::AESKey)
+    aes_key = expand_key(cipher_key, dw)
+
+    for round in 1:N_R-1
+        # Extract the words for the current round
+        round_words = dw[round * N_B + 1 : (round + 1) * N_B]
+
+        # Compute new words using inv_mix_columns_words function
+        new_words = inv_mix_columns_words(round_words)
+
+        # Update dw with the new words
+        dw[round * N_B + 1 : (round + 1) * N_B] = new_words
+    end
+end
+
+function inv_mix_columns_words(words::Vector{Word})
+    state = state.new_from_words(words)
+    inv_mix_columns(state)
+    columns = [big_endian_to_native_bytes(col[1], col[2], col[3], col[4]) for col in eachcol(state)]
+    return columns
+end
+
+function big_endian_to_native_bytes(byte1::UInt8, byte2, byte3, byte4)::UInt32
     # Concatenate the bytes into a big-endian 32-bit integer
     # WARNING: this should be the other way around to produce a big endian
     # But I dont know why it works like this, it may be just in my machine
@@ -56,6 +84,12 @@ function big_endian_to_native(endian_tuple::Tuple{UInt8,UInt8,UInt8,UInt8})::UIn
     big_endian_uint32 = (UInt32(byte4) << 24) | (UInt32(byte3) << 16) | (UInt32(byte2) << 8) | UInt32(byte1)
     # Convert the big-endian integer to the system's native endianness
     return ntoh(big_endian_uint32)
+end
+
+function big_endian_to_native(endian_tuple::Tuple{UInt8,UInt8,UInt8,UInt8})::UInt32
+    # Unpack the tuple into individual bytes
+    byte1, byte2, byte3, byte4 = endian_tuple
+    return big_endian_to_native_bytes(byte1, byte2, byte3, byte4)
 end
 
 function get_byte(uint32_value::UInt32, byte_index::UInt8)::UInt8
