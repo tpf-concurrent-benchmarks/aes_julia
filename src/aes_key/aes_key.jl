@@ -7,9 +7,10 @@ include("../state.jl")
 using .state
 
 const AESKey = Vector{Word}
+export AESKey
 
 const CipherKey = NTuple{4 * N_K, UInt8}
-
+export CipherKey
 
 function new_direct(cipher_key::CipherKey)
     aes_key = zeros(Word, N_B * (N_R + 1))
