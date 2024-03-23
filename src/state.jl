@@ -73,6 +73,22 @@ function add_round_key(_state::State, round_key::Vector{Word})
     end
 end
 
+function mix_columns(_state::State)
+    for i in 1:N_B
+        col = _state[:, i]
+        mix_column(col)
+        _state[:, i] = col
+    end
+end
+
+function inv_mix_columns(_state::State)
+    for i in 1:N_B
+        col = _state[:, i]
+        inv_mix_column(col)
+        _state[:, i] = col
+    end
+end
+
 function mix_column(col::Vector{UInt8})
     a, b, c, d = col[1], col[2], col[3], col[4]
     

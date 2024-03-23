@@ -67,12 +67,13 @@ function inv_expand_key(cipher_key::CipherKey, dw::AESKey)
         # Update dw with the new words
         dw[round * N_B + 1 : (round + 1) * N_B] = new_words
     end
+    return dw
 end
 
 function inv_mix_columns_words(words::Vector{Word})
-    state = state.new_from_words(words)
-    inv_mix_columns(state)
-    columns = [big_endian_to_native_bytes(col[1], col[2], col[3], col[4]) for col in eachcol(state)]
+    _state = state.new_from_words(words)
+    state.inv_mix_columns(_state)
+    columns = [big_endian_to_native_bytes(col[1], col[2], col[3], col[4]) for col in eachcol(_state)]
     return columns
 end
 
@@ -102,9 +103,9 @@ function get_byte(uint32_value::UInt32, byte_index::UInt8)::UInt8
 end
 
 function apply_s_box(value::UInt8)::UInt8
-    pos_x = Int(value >> 4) + 1
+    pos_x = Int(value >> 4)
     pos_y = Int(value & 0x0F) + 1
-    S_BOX[pos_x, pos_y]
+    S_BOX[pos_x * 16 + pos_y]
 end
 
 function sub_word(word::UInt32)::UInt32
