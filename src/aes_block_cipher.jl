@@ -13,6 +13,7 @@ end
 
 function new(cipher_key::CipherKey)
     expanded_key = aes_key.new_direct(cipher_key)
+    # print(cipher_key)
     inv_expanded_key = aes_key.new_inverse(cipher_key)
 
     return AESBlockCipher(expanded_key, inv_expanded_key)

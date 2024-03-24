@@ -24,8 +24,15 @@ function new_from_words(words::Vector{Word})
     
     for (i, word) in enumerate(words)
         byte1, byte2, byte3, byte4 = from_32_to_8(word)
-        # Fill the matrix row-wise
-        _state[i, :] .= [byte4, byte3, byte2, byte1]
+        print(byte4)
+        print(" ")
+        print(byte3)
+        print(" ")
+        print(byte2)
+        print(" ")
+        print(byte1)
+        println()
+        _state[:, i] .= [byte4, byte3, byte2, byte1]
     end
     
     return _state
