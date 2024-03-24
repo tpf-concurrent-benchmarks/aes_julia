@@ -57,19 +57,11 @@ end
 
 function inv_expand_key(cipher_key::CipherKey, dw::AESKey)
     aes_key = expand_key(cipher_key, dw)
-    # println(dw)
-    # for i in 1:(4*11)
-    #     print(dw[i], " ")
-    #     if i % 4 == 0
-    #         print("\n")
-    #     end
-    # end
+
     for round in 1:N_R-1
         # Extract the words for the current round
         round_words = dw[round * N_B + 1 : (round + 1) * N_B]
-
         # Compute new words using inv_mix_columns_words function
-        # println(join(round_words, ", "))
         new_words = inv_mix_columns_words(round_words)
         # Update dw with the new words
         dw[round * N_B + 1 : (round + 1) * N_B] = new_words
@@ -79,9 +71,6 @@ end
 
 function inv_mix_columns_words(words::Vector{Word})
     _state = state.new_from_words(words)
-    # for row in eachrow(_state)
-    #     println(row)
-    # end
     state.inv_mix_columns(_state)
     columns = [big_endian_to_native_bytes(col[1], col[2], col[3], col[4]) for col in eachcol(_state)]
     return columns
