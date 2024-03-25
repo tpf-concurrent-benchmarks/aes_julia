@@ -32,7 +32,6 @@ function new_u128(cypher_key::UInt128)
 end
 
 function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8})
-    data_out = zeros(UInt8, 4 * N_B)
 
     _state::State = state.new_from_data_in(data_in)
 
@@ -49,13 +48,12 @@ function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8})
     state.mix_columns(_state)
     state.add_round_key(_state, expanded_key[(N_R*N_B)+1:((N_R+1)*N_B)])
 
-    state.set_data_out(data_out)
+    data_out = state.set_data_out(_state)
 
     return data_out
 end
 
 function inv_cipher_block(expanded_key::AESKey, data_in::Vector{UInt8})
-    data_out = zeros(UInt8, 4 * N_B)
 
     _state::State = state.new_from_data_in(data_in)
 
@@ -72,7 +70,7 @@ function inv_cipher_block(expanded_key::AESKey, data_in::Vector{UInt8})
     state.mix_columns(_state)
     state.add_round_key(_state, inv_expanded_key[1:N_B])
 
-    state.set_data_out(data_out)
+    data_out = state.set_data_out(_state)
 
     return data_out
 end
