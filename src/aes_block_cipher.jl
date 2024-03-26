@@ -51,21 +51,20 @@ function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8})
     return data_out
 end
 
-function inv_cipher_block(expanded_key::AESKey, data_in::Vector{UInt8})
+function inv_cipher_block(inv_expanded_key::AESKey, data_in::Vector{UInt8})
 
     _state::State = state.new_from_data_in(data_in)
-
-    state.add_round_key(_state, inv_expanded_key[1:N_B])
-
+    
+    state.add_round_key(_state, inv_expanded_key[(N_R*N_B)+1:((N_R+1)*N_B)])
+    
     for round in reverse(1:N_R-1)
-        state.sub_bytes(_state)
-        state.shift_rows(_state)
-        state.mix_columns(_state)
+        state.inv_sub_bytes(_state)
+        state.inv_shift_rows(_state)
+        state.inv_mix_columns(_state)
         state.add_round_key(_state, inv_expanded_key[(round*N_B)+1:((round+1)*N_B)])
     end
-    state.sub_bytes(_state)
-    state.shift_rows(_state)
-    state.mix_columns(_state)
+    state.inv_sub_bytes(_state)
+    state.inv_shift_rows(_state)
     state.add_round_key(_state, inv_expanded_key[1:N_B])
 
     data_out = state.set_data_out(_state)
