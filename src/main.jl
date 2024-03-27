@@ -1,13 +1,13 @@
-include("constants.jl")
+include("aes_block_cipher/constants.jl")
 using .constants
 
-include("aes_key/aes_key.jl")
+include("aes_block_cipher/aes_key/aes_key.jl")
 using .aes_key
 
-include("state.jl")
+include("aes_block_cipher/state.jl")
 using .state
 
-include("aes_block_cipher.jl")
+include("aes_block_cipher/aes_block_cipher.jl")
 using .aes_block_cipher
 
 my_tuple::NTuple{16, UInt8} = (0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c)
