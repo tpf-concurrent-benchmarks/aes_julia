@@ -14,8 +14,7 @@ end
 function read_chunks(reader::ChunkReader, chunks_amount::Int, buffer::Vector{Vector{UInt8}})
     chunks_filled = 1
     while chunks_filled <= chunks_amount
-        chunk = buffer[chunks_filled]
-        bytes_read = fill_chunk(reader, chunk)
+        bytes_read = fill_chunk(reader, buffer[chunks_filled])
         if bytes_read == 0
             return chunks_filled
         end
@@ -32,8 +31,6 @@ function fill_chunk(reader::ChunkReader, buffer::Vector{UInt8})
     while bytes_read < reader.chunk_size
         slice = @view buffer[(bytes_read+1):16]
         n = readbytes!(reader.input, slice, 16 - bytes_read)
-        println(n)
-        println(buffer)
         if n == 0
             if reader.with_padding
                 apply_null_padding(reader.chunk_size - bytes_read, buffer)

@@ -17,6 +17,8 @@ using .config
 include("utils/chunk_reader.jl")
 using .chunk_reader
 
+include("utils/chunk_writer.jl")
+using .chunk_reader
 using Random
 
 
@@ -28,10 +30,15 @@ using Random
 #     data_out = aes_block_cipher.cipher_block(block_cipher.inv_expanded_key, data_in)
 # end
 
-chunk= chunk_reader.ChunkReader("./test.txt", 16, true)
+chunk = chunk_reader.ChunkReader("./test.txt", Int(4 * N_B), true)
 buffer::Vector{Vector{UInt8}} = [fill(UInt8(0), 16) for i in 1:2]
+chunk_reader.read_chunks(chunk, 1, buffer)
+println(buffer)
 chunk_reader.read_chunks(chunk, 2, buffer)
 println(buffer)
+writer = chunk_writer.ChunkWriter("./test2.txt", true)
+
+chunk_writer.write_chunks(writer, buffer)
 
 println("finished")
 
