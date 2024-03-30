@@ -32,13 +32,13 @@ using Random
 
 chunk = chunk_reader.ChunkReader("./test.txt", Int(4 * N_B), true)
 buffer::Vector{Vector{UInt8}} = [fill(UInt8(0), 16) for i in 1:2]
-@time chunk_reader.read_chunks(chunk, 2, buffer)
+# @time chunk_reader.read_chunks(chunk, 2, buffer)
 # println(buffer)
-@time chunk_reader.read_chunks(chunk, 2, buffer)
+chunk_reader.read_chunks(chunk, 2, buffer)
 # println(buffer)
-# writer = chunk_writer.ChunkWriter("./test2.txt", true)
+writer = chunk_writer.ChunkWriter("./test2.txt", true)
 
-# chunk_writer.write_chunks(writer, buffer)
+chunk_writer.write_chunks(writer, buffer)
 
 println("finished")
 
