@@ -31,8 +31,9 @@ function new_from_words(words::Vector{Word})
     return _state
 end
 
+#julia convert 4 by 4 matrix into 16 element vector in place
 function set_data_out(_state::State)
-    return reshape(_state, 1, Int(4 * N_B))
+    return vec(transpose(_state))
 end
 
 function sub_bytes(_state::State)

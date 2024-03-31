@@ -13,6 +13,7 @@ struct AESBlockCipher
     expanded_key::AESKey
     inv_expanded_key::AESKey
 end
+export AESBlockCipher
 
 function new(cipher_key::CipherKey)
     expanded_key = aes_key.new_direct(cipher_key)
