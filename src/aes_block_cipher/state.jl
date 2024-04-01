@@ -33,7 +33,7 @@ end
 
 #julia convert 4 by 4 matrix into 16 element vector in place
 function set_data_out(_state::State)
-    return vec(transpose(_state))
+    return vec(_state)
 end
 
 function sub_bytes(_state::State)

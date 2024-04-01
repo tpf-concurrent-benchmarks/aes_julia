@@ -10,7 +10,7 @@ function ChunkWriter(path::String, remove_padding::Bool)
     if remove_padding
         return ChunkWriter(open(path, "w"), write_chunk_without_padding)
     end
-    return ChunkWriter(open(path, "w"), write)
+    return ChunkWriter(open(path, "w"), write_with_padding)
 end
 
 function write_chunks(writer::ChunkWriter, chunks::Vector{Vector{UInt8}})
@@ -38,6 +38,12 @@ function write_chunk_without_padding(output::IO, chunk::Vector{UInt8})
         return length(chunk)
     end
     return n
+end
+
+function write_with_padding(output::IO, chunk::Vector{UInt8})
+    println("writing with padding")
+    println(chunk)
+    return write(output, chunk)
 end
 
 end

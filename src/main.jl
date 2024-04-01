@@ -27,6 +27,9 @@ env_variables = config.read_config()
 cipher_key = aes_key.CipherKey((0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c))
 aes_cipher.cipher(env_variables["DECRYPTED_TEXT"], env_variables["ENCRYPTED_TEXT"], cipher_key)
 
+#now try decipher
+aes_cipher.decipher(env_variables["ENCRYPTED_TEXT"], "data/dencrypted2.txt", cipher_key)
+
 
 
 
@@ -68,6 +71,14 @@ aes_cipher.cipher(env_variables["DECRYPTED_TEXT"], env_variables["ENCRYPTED_TEXT
 # my_tuple::NTuple{16, UInt8} = (0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c)
 # cipher_key = aes_key.CipherKey(my_tuple)
 # block_cipher = aes_block_cipher.new(cipher_key)
+# data_in::Vector{UInt8} = [0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34]
+# algo = aes_block_cipher.cipher_block(block_cipher.expanded_key, data_in)
+# for i in 1:16
+#     print(string(algo[i], base=16), " ")
+#     if i % 4 == 0
+#         println()
+#     end
+# end
 # for i in 1:10000000
 #     data_in = rand(UInt8, 16)
 #     data_out = aes_block_cipher.cipher_block(block_cipher.inv_expanded_key, data_in)

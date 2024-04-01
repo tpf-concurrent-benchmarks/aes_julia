@@ -32,7 +32,39 @@ function cipher(input_path::String, output_path::String, cipher_key::CipherKey)
         if chunks_filled == 1
             break
         end
+        # for i in 1:2
+        #     println(buffer[i])
+        # end
         results = cipher_blocks(buffer, block_cipher)
+        # for i in 1:2
+        #     println(results[i])
+        # end
+        chunk_writer.write_chunks(writer, results)
+    end
+    close(reader.input)
+    close(writer.output)
+end
+
+function decipher_blocks(blocks::Vector{Vector{UInt8}}, block_cipher::AESBlockCipher)
+    results = similar(blocks)
+    @threads for i in eachindex(blocks)
+        @inbounds results[i] = aes_block_cipher.inv_cipher_block(block_cipher.inv_expanded_key, blocks[i])
+    end
+    results
+end
+
+function decipher(input_path::String, output_path::String, cipher_key::CipherKey)
+    block_cipher = aes_block_cipher.new(cipher_key)
+    reader = chunk_reader.ChunkReader(input_path, 16, false)
+    writer = chunk_writer.ChunkWriter(output_path, true)
+    buffer = [fill(UInt8(0), 16) for i in 1:2]
+    while true
+        chunks_filled = chunk_reader.read_chunks(reader, 2, buffer)
+        if chunks_filled == 1
+            break
+        end
+        # println(buffer)
+        results = decipher_blocks(buffer, block_cipher)
         chunk_writer.write_chunks(writer, results)
     end
     close(reader.input)
