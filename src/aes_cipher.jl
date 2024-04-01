@@ -32,13 +32,9 @@ function cipher(input_path::String, output_path::String, cipher_key::CipherKey)
         if chunks_filled == 1
             break
         end
-        # for i in 1:2
-        #     println(buffer[i])
-        # end
+
         results = cipher_blocks(buffer, block_cipher)
-        # for i in 1:2
-        #     println(results[i])
-        # end
+
         chunk_writer.write_chunks(writer, results)
     end
     close(reader.input)
@@ -63,7 +59,7 @@ function decipher(input_path::String, output_path::String, cipher_key::CipherKey
         if chunks_filled == 1
             break
         end
-        # println(buffer)
+
         results = decipher_blocks(buffer, block_cipher)
         chunk_writer.write_chunks(writer, results)
     end
