@@ -56,14 +56,15 @@ end
 
 function shift_rows(_state::State)
     for i in 1:4
-        circshift!(_state[i, :],  _state[i, :], -i+1)
+        col = @view _state[i, :]
+        circshift!(col, i-1)
     end
 end
 
-
 function inv_shift_rows(_state::State)
     for i in 1:4
-        circshift!(_state[i, :], _state[i, :], i-1)
+        col = @view _state[i, :]
+        circshift!(col, -i+1)
     end
 end
 
