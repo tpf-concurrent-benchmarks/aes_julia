@@ -77,19 +77,11 @@ end
 
 function add_round_key(_state::State, round_key::AbstractArray{Word})
     for i in 1:N_B
-        col = _state[:, i]
         byte1, byte2, byte3, byte4 = from_32_to_8(round_key[i])
-        new_col = [
-            col[1] ⊻ byte4,
-            col[2] ⊻ byte3,
-            col[3] ⊻ byte2,
-            col[4] ⊻ byte1,
-        ]
-        _state[:, i] = new_col
-        # _state[1, i] = col[1] ⊻ byte4
-        # _state[2, i] = col[2] ⊻ byte3
-        # _state[3, i] = col[3] ⊻ byte2
-        # _state[4, i] = col[4] ⊻ byte1
+        _state[1, i] ⊻= byte4
+        _state[2, i] ⊻= byte3
+        _state[3, i] ⊻= byte2
+        _state[4, i] ⊻= byte1
     end
 end
 
