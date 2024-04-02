@@ -49,18 +49,33 @@ function apply_substitution(_state::State, sub_box::Vector{UInt8})
 end
 
 function shift_rows(_state::State)
-    for i in 1:size(_state, 1)
-        _state[i, :] = circshift(_state[i, :], -i+1)
+    for i in 1:4
+        circshift!(_state[i, :],  _state[i, :], -i+1)
     end
 end
+
 
 function inv_shift_rows(_state::State)
-    for i in 1:size(_state, 1)
-        _state[i, :] = circshift(_state[i, :], i-1)
+    for i in 1:4
+        circshift!(_state[i, :], _state[i, :], i-1)
     end
 end
 
-function add_round_key(_state::State, round_key::Vector{Word})
+#there was a minor improvement by using circshift! instead of circshift
+# but it is not recommended for inplace use so if bugs are encontered use this version instead
+# function shift_rows(_state::State)
+#     for i in 1:4
+#         _state[i, :] = circshift(_state[i, :], -i+1)
+#     end
+# end
+
+# function inv_shift_rows(_state::State)
+#     for i in 1:4
+#         _state[i, :] = circshift(_state[i, :], i-1)
+#     end
+# end
+
+function add_round_key(_state::State, round_key::AbstractArray{Word})
     for i in 1:N_B
         col = _state[:, i]
         byte1, byte2, byte3, byte4 = from_32_to_8(round_key[i])
