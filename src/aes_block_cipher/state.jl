@@ -86,6 +86,10 @@ function add_round_key(_state::State, round_key::AbstractArray{Word})
             col[4] ⊻ byte1,
         ]
         _state[:, i] = new_col
+        # _state[1, i] = col[1] ⊻ byte4
+        # _state[2, i] = col[2] ⊻ byte3
+        # _state[3, i] = col[3] ⊻ byte2
+        # _state[4, i] = col[4] ⊻ byte1
     end
 end
 
