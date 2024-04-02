@@ -32,8 +32,14 @@ function new_from_words(words::Vector{Word})
 end
 
 #julia convert 4 by 4 matrix into 16 element vector in place
-function set_data_out(_state::State)
-    return vec(_state)
+function set_data_out(_state::State, data_out::Vector{UInt8})
+    idx = 1
+    for j in 1:4
+        for i in 1:4
+            @inbounds data_out[idx] = _state[i, j]
+            idx += 1
+        end
+    end
 end
 
 function sub_bytes(_state::State)

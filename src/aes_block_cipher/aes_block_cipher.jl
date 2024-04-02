@@ -47,9 +47,7 @@ function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8})
     state.shift_rows(_state)
     state.add_round_key(_state, expanded_key[(N_R*N_B)+1:((N_R+1)*N_B)])
 
-    data_out = state.set_data_out(_state)
-
-    return data_out
+    state.set_data_out(_state, data_in)
 end
 
 function inv_cipher_block(inv_expanded_key::AESKey, data_in::Vector{UInt8})
@@ -68,9 +66,7 @@ function inv_cipher_block(inv_expanded_key::AESKey, data_in::Vector{UInt8})
     state.inv_shift_rows(_state)
     state.add_round_key(_state, inv_expanded_key[1:N_B])
 
-    data_out = state.set_data_out(_state)
-
-    return data_out
+    state.set_data_out(_state, data_in)
 end
 
 end

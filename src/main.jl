@@ -33,7 +33,7 @@ function run_cipher(buffer_size::Int)
         @time aes_cipher.cipher(cipher_stack)
         aes_cipher.flush_cipher(cipher_stack)
 
-        aes_cipher.decipher(cipher_stack)
+        @time aes_cipher.decipher(cipher_stack)
         aes_cipher.flush_decipher(cipher_stack)
 
         aes_cipher.reset_files(cipher_stack)
