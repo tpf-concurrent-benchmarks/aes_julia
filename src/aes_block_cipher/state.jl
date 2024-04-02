@@ -7,6 +7,9 @@ using .constants
 const State = Matrix{UInt8}
 export State
 
+#WARNING: all posible @inbounds have been tested
+# dont waste time attempting to add more
+
 function new_from_data_in(data_in::Vector{UInt8})
     state::State = reshape(data_in, 4, Int(N_B))
     return state
@@ -85,7 +88,7 @@ end
 
 function add_round_key(_state::State, round_key::AbstractArray{Word})
     for i in 1:N_B
-        byte1, byte2, byte3, byte4 = from_32_to_8(round_key[i])
+        @inbounds byte1, byte2, byte3, byte4 = from_32_to_8(round_key[i])
         _state[1, i] ⊻= byte4
         _state[2, i] ⊻= byte3
         _state[3, i] ⊻= byte2
@@ -95,38 +98,42 @@ end
 
 function mix_columns(_state::State)
     for i in 1:N_B
-        col = @view _state[:, i]
+        @inbounds col = @view _state[:, i]
         mix_column(col)
     end
 end
 
 function inv_mix_columns(_state::State)
     for i in 1:N_B
-        col = @view _state[:, i]
+        @inbounds col = @view _state[:, i]
         inv_mix_column(col)
     end
 end
 
 function mix_column(col::AbstractArray{UInt8})
-    @inbounds a, b, c, d = col[1], col[2], col[3], col[4]
-    
-    @inbounds col[1] = galois_double(reinterpret(Int8, a ⊻ b)) ⊻ b ⊻ c ⊻ d
-    @inbounds col[2] = galois_double(reinterpret(Int8, b ⊻ c)) ⊻ c ⊻ d ⊻ a
-    @inbounds col[3] = galois_double(reinterpret(Int8, c ⊻ d)) ⊻ d ⊻ a ⊻ b
-    @inbounds col[4] = galois_double(reinterpret(Int8, d ⊻ a)) ⊻ a ⊻ b ⊻ c
+    @inbounds begin
+        a, b, c, d = col[1], col[2], col[3], col[4]
+        
+        col[1] = galois_double(reinterpret(Int8, a ⊻ b)) ⊻ b ⊻ c ⊻ d
+        col[2] = galois_double(reinterpret(Int8, b ⊻ c)) ⊻ c ⊻ d ⊻ a
+        col[3] = galois_double(reinterpret(Int8, c ⊻ d)) ⊻ d ⊻ a ⊻ b
+        col[4] = galois_double(reinterpret(Int8, d ⊻ a)) ⊻ a ⊻ b ⊻ c
+    end
 end
 
 function inv_mix_column(col::AbstractArray{UInt8})
-    @inbounds a, b, c, d = col[1], col[2], col[3], col[4]
-    
-    x = galois_double(reinterpret(Int8, a ⊻ b ⊻ c ⊻ d))
-    y = galois_double(reinterpret(Int8, x ⊻ a ⊻ c))
-    z = galois_double(reinterpret(Int8, x ⊻ b ⊻ d))
-    
-    @inbounds col[1] = galois_double(reinterpret(Int8, y ⊻ a ⊻ b)) ⊻ b ⊻ c ⊻ d
-    @inbounds col[2] = galois_double(reinterpret(Int8, z ⊻ b ⊻ c)) ⊻ c ⊻ d ⊻ a
-    @inbounds col[3] = galois_double(reinterpret(Int8, y ⊻ c ⊻ d)) ⊻ d ⊻ a ⊻ b
-    @inbounds col[4] = galois_double(reinterpret(Int8, z ⊻ d ⊻ a)) ⊻ a ⊻ b ⊻ c
+    @inbounds begin
+        a, b, c, d = col[1], col[2], col[3], col[4]
+        
+        x = galois_double(reinterpret(Int8, a ⊻ b ⊻ c ⊻ d))
+        y = galois_double(reinterpret(Int8, x ⊻ a ⊻ c))
+        z = galois_double(reinterpret(Int8, x ⊻ b ⊻ d))
+        
+        col[1] = galois_double(reinterpret(Int8, y ⊻ a ⊻ b)) ⊻ b ⊻ c ⊻ d
+        col[2] = galois_double(reinterpret(Int8, z ⊻ b ⊻ c)) ⊻ c ⊻ d ⊻ a
+        col[3] = galois_double(reinterpret(Int8, y ⊻ c ⊻ d)) ⊻ d ⊻ a ⊻ b
+        col[4] = galois_double(reinterpret(Int8, z ⊻ d ⊻ a)) ⊻ a ⊻ b ⊻ c
+    end
 end
 
 function galois_double(a::Int8)::UInt8
