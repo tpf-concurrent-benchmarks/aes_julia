@@ -15,6 +15,16 @@ function new_from_data_in(data_in::Vector{UInt8})
     return state
 end
 
+function new_from_data_in_with_state(data_in::Vector{UInt8}, state::State)
+    indx = 1
+    for j in 1:4
+        for i in 1:4
+            @inbounds state[i, j] = data_in[indx]
+            indx += 1
+        end
+    end
+end
+
 function from_32_to_8(word::Word)
     byte1 = UInt8(word & 0xFF)
     byte2 = UInt8((word >> 8) & 0xFF)

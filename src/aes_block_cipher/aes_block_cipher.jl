@@ -32,9 +32,16 @@ function new_u128(cypher_key::UInt128)
     return new(cypher_key)
 end
 
-function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8})
+function cipher_blocks(blocks::AbstractArray{Vector{UInt8}}, expanded_key::AESKey)
+    _state::State = zeros(UInt8, 4, 4)
+    for i in eachindex(blocks)
+        @inbounds cipher_block(expanded_key, blocks[i], _state)
+    end
+end
 
-    _state::State = state.new_from_data_in(data_in)
+function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8}, _state::State)
+
+    state.new_from_data_in_with_state(data_in, _state)
 
     state.add_round_key(_state, expanded_key[1:N_B])
     for round in 1:N_R-1
@@ -50,9 +57,16 @@ function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8})
     state.set_data_out(_state, data_in)
 end
 
-function inv_cipher_block(inv_expanded_key::AESKey, data_in::Vector{UInt8})
+function inv_cipher_blocks(blocks::AbstractArray{Vector{UInt8}}, inv_expanded_key::AESKey)
+    _state::State = zeros(UInt8, 4, 4)
+    for i in eachindex(blocks)
+        @inbounds inv_cipher_block(inv_expanded_key, blocks[i], _state)
+    end
+end
 
-    _state::State = state.new_from_data_in(data_in)
+function inv_cipher_block(inv_expanded_key::AESKey, data_in::Vector{UInt8}, _state::State)
+
+    state.new_from_data_in_with_state(data_in, _state)
     
     state.add_round_key(_state, inv_expanded_key[(N_R*N_B)+1:((N_R+1)*N_B)])
     
