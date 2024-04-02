@@ -87,21 +87,19 @@ end
 
 function mix_columns(_state::State)
     for i in 1:N_B
-        col = _state[:, i]
+        col = @view _state[:, i]
         mix_column(col)
-        _state[:, i] = col
     end
 end
 
 function inv_mix_columns(_state::State)
     for i in 1:N_B
-        col = _state[:, i]
+        col = @view _state[:, i]
         inv_mix_column(col)
-        _state[:, i] = col
     end
 end
 
-function mix_column(col::Vector{UInt8})
+function mix_column(col::AbstractArray{UInt8})
     a, b, c, d = col[1], col[2], col[3], col[4]
     
     col[1] = galois_double(reinterpret(Int8, a ⊻ b)) ⊻ b ⊻ c ⊻ d
@@ -110,7 +108,7 @@ function mix_column(col::Vector{UInt8})
     col[4] = galois_double(reinterpret(Int8, d ⊻ a)) ⊻ a ⊻ b ⊻ c
 end
 
-function inv_mix_column(col::Vector{UInt8})
+function inv_mix_column(col::AbstractArray{UInt8})
     a, b, c, d = col[1], col[2], col[3], col[4]
     
     x = galois_double(reinterpret(Int8, a ⊻ b ⊻ c ⊻ d))
