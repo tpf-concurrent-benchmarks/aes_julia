@@ -6,9 +6,14 @@ using .constants
 const State = Matrix{UInt8}
 export State
 
-function new_from_data_in(data_in::Vector{UInt8})
-    state::State = reshape(data_in, 4, Int(N_B))
-    return state
+function new_from_data_in(data_in::Vector{UInt8}, _state::State)
+    idx = 1
+    for j in 1:4
+        for i in 1:4
+            @inbounds _state[i, j] = data_in[idx]
+            idx += 1
+        end
+    end
 end
 
 function from_32_to_8(word::Word)
