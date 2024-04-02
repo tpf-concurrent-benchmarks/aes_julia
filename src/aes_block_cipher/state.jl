@@ -2,6 +2,7 @@ module state
 
 include("constants.jl")
 using .constants
+
 #make state a reference to matrix type
 const State = Matrix{UInt8}
 export State
@@ -107,25 +108,25 @@ function inv_mix_columns(_state::State)
 end
 
 function mix_column(col::AbstractArray{UInt8})
-    a, b, c, d = col[1], col[2], col[3], col[4]
+    @inbounds a, b, c, d = col[1], col[2], col[3], col[4]
     
-    col[1] = galois_double(reinterpret(Int8, a ⊻ b)) ⊻ b ⊻ c ⊻ d
-    col[2] = galois_double(reinterpret(Int8, b ⊻ c)) ⊻ c ⊻ d ⊻ a
-    col[3] = galois_double(reinterpret(Int8, c ⊻ d)) ⊻ d ⊻ a ⊻ b
-    col[4] = galois_double(reinterpret(Int8, d ⊻ a)) ⊻ a ⊻ b ⊻ c
+    @inbounds col[1] = galois_double(reinterpret(Int8, a ⊻ b)) ⊻ b ⊻ c ⊻ d
+    @inbounds col[2] = galois_double(reinterpret(Int8, b ⊻ c)) ⊻ c ⊻ d ⊻ a
+    @inbounds col[3] = galois_double(reinterpret(Int8, c ⊻ d)) ⊻ d ⊻ a ⊻ b
+    @inbounds col[4] = galois_double(reinterpret(Int8, d ⊻ a)) ⊻ a ⊻ b ⊻ c
 end
 
 function inv_mix_column(col::AbstractArray{UInt8})
-    a, b, c, d = col[1], col[2], col[3], col[4]
+    @inbounds a, b, c, d = col[1], col[2], col[3], col[4]
     
     x = galois_double(reinterpret(Int8, a ⊻ b ⊻ c ⊻ d))
     y = galois_double(reinterpret(Int8, x ⊻ a ⊻ c))
     z = galois_double(reinterpret(Int8, x ⊻ b ⊻ d))
     
-    col[1] = galois_double(reinterpret(Int8, y ⊻ a ⊻ b)) ⊻ b ⊻ c ⊻ d
-    col[2] = galois_double(reinterpret(Int8, z ⊻ b ⊻ c)) ⊻ c ⊻ d ⊻ a
-    col[3] = galois_double(reinterpret(Int8, y ⊻ c ⊻ d)) ⊻ d ⊻ a ⊻ b
-    col[4] = galois_double(reinterpret(Int8, z ⊻ d ⊻ a)) ⊻ a ⊻ b ⊻ c
+    @inbounds col[1] = galois_double(reinterpret(Int8, y ⊻ a ⊻ b)) ⊻ b ⊻ c ⊻ d
+    @inbounds col[2] = galois_double(reinterpret(Int8, z ⊻ b ⊻ c)) ⊻ c ⊻ d ⊻ a
+    @inbounds col[3] = galois_double(reinterpret(Int8, y ⊻ c ⊻ d)) ⊻ d ⊻ a ⊻ b
+    @inbounds col[4] = galois_double(reinterpret(Int8, z ⊻ d ⊻ a)) ⊻ a ⊻ b ⊻ c
 end
 
 function galois_double(a::Int8)::UInt8
