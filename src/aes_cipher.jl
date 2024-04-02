@@ -13,58 +13,84 @@ using .chunk_writer
 include("aes_block_cipher/aes_key/aes_key.jl")
 using .aes_key
 
-function cipher_blocks(blocks::Vector{Vector{UInt8}}, block_cipher::AESBlockCipher)
-    results = similar(blocks) #maybe optimize by reusing these vector between funtions
+struct CipherStack
+    block_cipher::AESBlockCipher
+    reader_cipher::ChunkReader
+    writer_cipher::ChunkWriter
+    reader_decipher::ChunkReader
+    writer_decipher::ChunkWriter
+    buffer::Vector{Vector{UInt8}}
+    buffer_size::Int
+    results::Vector{Vector{UInt8}}
+end
+
+function new_cipher_stack(input_path::String, encrypted_path::String, decrypted_path::String, cipher_key::CipherKey, buffer_size::Int)
+    block_cipher = aes_block_cipher.new(cipher_key)
+    reader_cipher = chunk_reader.ChunkReader(input_path, 16, true)
+    writer_cipher = chunk_writer.ChunkWriter(encrypted_path, false)
+    reader_decipher = chunk_reader.ChunkReader(encrypted_path, 16, false)
+    writer_decipher = chunk_writer.ChunkWriter(decrypted_path, true)
+    buffer = [Vector{UInt8}(undef, 16) for i in 1:buffer_size]
+    results = similar(buffer)
+    CipherStack(block_cipher, reader_cipher, writer_cipher, reader_decipher, writer_decipher, buffer, buffer_size, results)
+end
+
+function delete_cipher_stack(cipher_stack::CipherStack)
+    close(cipher_stack.reader_cipher.input)
+    close(cipher_stack.writer_cipher.output)
+    close(cipher_stack.reader_decipher.input)
+    close(cipher_stack.writer_decipher.output)
+end
+
+function cipher_blocks(blocks::Vector{Vector{UInt8}}, results::Vector{Vector{UInt8}}, expanded_key::AESKey)
     #also maybe check if creating an array of expanded keys is faster
     @threads for i in eachindex(blocks)
-        @inbounds results[i] = aes_block_cipher.cipher_block(block_cipher.expanded_key, blocks[i])
+        @inbounds results[i] = aes_block_cipher.cipher_block(expanded_key, blocks[i])
     end
-    results
 end
 
-function cipher(input_path::String, output_path::String, cipher_key::CipherKey, buffer_size::Int)
-    block_cipher = aes_block_cipher.new(cipher_key)
-    reader = chunk_reader.ChunkReader(input_path, 16, true)
-    writer = chunk_writer.ChunkWriter(output_path, false)
-    buffer = [Vector{UInt8}(undef, 16) for i in 1:buffer_size]
+function cipher(cipher_stack::CipherStack)
+    expanded_key = cipher_stack.block_cipher.expanded_key
+    reader = cipher_stack.reader_cipher
+    writer = cipher_stack.writer_cipher
+    buffer = cipher_stack.buffer
+    results = cipher_stack.results
+    buffer_size = cipher_stack.buffer_size
     while true
         chunks_filled = chunk_reader.read_chunks(reader, buffer_size, buffer)
         if chunks_filled == 1
             break
         end
 
-        results = cipher_blocks(buffer[1:chunks_filled], block_cipher)
+        cipher_blocks(buffer[1:chunks_filled], results, expanded_key)
 
-        chunk_writer.write_chunks(writer, results)
+        chunk_writer.write_chunks(writer, results[1:chunks_filled])
     end
-    close(reader.input)
-    close(writer.output)
 end
 
-function decipher_blocks(blocks::Vector{Vector{UInt8}}, block_cipher::AESBlockCipher)
-    results = similar(blocks)
+function decipher_blocks(blocks::Vector{Vector{UInt8}}, results::Vector{Vector{UInt8}}, inv_expanded_key::AESKey)
     @threads for i in eachindex(blocks)
-        @inbounds results[i] = aes_block_cipher.inv_cipher_block(block_cipher.inv_expanded_key, blocks[i])
+        @inbounds results[i] = aes_block_cipher.inv_cipher_block(inv_expanded_key, blocks[i])
     end
-    results
 end
 
-function decipher(input_path::String, output_path::String, cipher_key::CipherKey, buffer_size::Int)
-    block_cipher = aes_block_cipher.new(cipher_key)
-    reader = chunk_reader.ChunkReader(input_path, 16, false)
-    writer = chunk_writer.ChunkWriter(output_path, true)
-    buffer = [Vector{UInt8}(undef, 16) for i in 1:buffer_size]
+function decipher(cipher_stack::CipherStack)
+    inv_expanded_key = cipher_stack.block_cipher.inv_expanded_key
+    reader = cipher_stack.reader_decipher
+    writer = cipher_stack.writer_decipher
+    buffer = cipher_stack.buffer
+    results = cipher_stack.results
+    buffer_size = cipher_stack.buffer_size
     while true
         chunks_filled = chunk_reader.read_chunks(reader, buffer_size, buffer)
         if chunks_filled == 1
             break
         end
 
-        results = decipher_blocks(buffer[1:chunks_filled], block_cipher)
-        chunk_writer.write_chunks(writer, results)
+        decipher_blocks(buffer[1:chunks_filled], results, inv_expanded_key)
+        chunk_writer.write_chunks(writer, results[1:chunks_filled])
     end
-    close(reader.input)
-    close(writer.output)
 end
+
 
 end

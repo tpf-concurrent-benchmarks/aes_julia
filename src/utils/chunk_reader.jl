@@ -6,6 +6,7 @@ mutable struct ChunkReader
     chunk_size::Int
     with_padding::Bool
 end
+export ChunkReader
 
 function ChunkReader(path::String, chunk_size::Int, with_padding::Bool)
     return ChunkReader(open(path), chunk_size, with_padding)

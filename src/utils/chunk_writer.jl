@@ -5,6 +5,7 @@ mutable struct ChunkWriter
     output::IO
     write_function::Function
 end
+export ChunkWriter
 
 function ChunkWriter(path::String, remove_padding::Bool)
     if remove_padding
