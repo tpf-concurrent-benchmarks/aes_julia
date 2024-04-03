@@ -37,6 +37,8 @@ function cipher_blocks(blocks::AbstractArray{Vector{UInt8}}, expanded_key::AESKe
     for i in eachindex(blocks)
         @inbounds cipher_block(expanded_key, blocks[i], _state)
     end
+
+    return blocks
 end
 
 function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8}, _state::State)
@@ -62,6 +64,7 @@ function inv_cipher_blocks(blocks::AbstractArray{Vector{UInt8}}, inv_expanded_ke
     for i in eachindex(blocks)
         @inbounds inv_cipher_block(inv_expanded_key, blocks[i], _state)
     end
+    return blocks
 end
 
 function inv_cipher_block(inv_expanded_key::AESKey, data_in::Vector{UInt8}, _state::State)

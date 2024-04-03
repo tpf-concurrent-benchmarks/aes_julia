@@ -13,6 +13,14 @@ using .chunk_writer
 include("aes_block_cipher/aes_key/aes_key.jl")
 using .aes_key
 
+using Base.Threads
+
+using Distributed
+
+using StaticArrays
+
+import Base.Iterators
+
 struct CipherStack
     block_cipher::AESBlockCipher
     reader_cipher::ChunkReader
@@ -57,16 +65,12 @@ function delete_cipher_stack(cipher_stack::CipherStack)
 end
 
 function cipher_blocks(blocks::Vector{Vector{UInt8}}, chunks_filled::Int, cipher_stack::CipherStack)
+    partitions = Iterators.partition(blocks, 32)
     expanded_key = cipher_stack.block_cipher.expanded_key
-    n_threads = cipher_stack.n_threads
-    step = chunks_filled ÷ (n_threads * 8) #spawn 8 jobs per thread
-    if step < chunks_filled
-        step = chunks_filled
+    results_partitions = pmap(partitions) do partition
+        aes_block_cipher.cipher_blocks(partition, expanded_key)
     end
-    @threads for i in 0:(chunks_filled ÷ step)-1
-        slice = @view blocks[(i*step)+1:(i+1)*step]
-        aes_block_cipher.cipher_blocks(slice, expanded_key)
-    end
+    return reduce(vcat, results_partitions)
 end
 
 function cipher(cipher_stack::CipherStack)
@@ -84,23 +88,19 @@ function cipher(cipher_stack::CipherStack)
             break
         end
 
-        cipher_blocks(buffer[1:chunks_filled], chunks_filled, cipher_stack)
+        result = cipher_blocks(buffer[1:chunks_filled], chunks_filled, cipher_stack)
 
-        chunk_writer.write_chunks(writer, buffer[1:chunks_filled])
+        chunk_writer.write_chunks(writer, result)
     end
 end
 
 function decipher_blocks(blocks::Vector{Vector{UInt8}}, chunks_filled::Int, cipher_stack::CipherStack)
+    partitions = Iterators.partition(blocks, 32)
     inv_expanded_key = cipher_stack.block_cipher.inv_expanded_key
-    n_threads = cipher_stack.n_threads
-    step = chunks_filled ÷ (n_threads * 8) #spawn 8 jobs per thread
-    if step < chunks_filled
-        step = chunks_filled
+    results_partitions = pmap(partitions) do partition
+        aes_block_cipher.inv_cipher_blocks(partition, inv_expanded_key)
     end
-    @threads for i in 0:(chunks_filled ÷ step)-1
-        slice = @view blocks[(i*step)+1:(i+1)*step]
-        aes_block_cipher.inv_cipher_blocks(slice, inv_expanded_key)
-    end
+    return reduce(vcat, results_partitions)
 end
 
 function decipher(cipher_stack::CipherStack)
@@ -115,10 +115,9 @@ function decipher(cipher_stack::CipherStack)
         if chunks_filled == 0
             break
         end
-
-        decipher_blocks(buffer[1:chunks_filled], chunks_filled, cipher_stack)
-
-        chunk_writer.write_chunks(writer, buffer[1:chunks_filled])
+        result = decipher_blocks(buffer[1:chunks_filled], chunks_filled, cipher_stack)
+        
+        chunk_writer.write_chunks(writer, result)
     end
 end
 

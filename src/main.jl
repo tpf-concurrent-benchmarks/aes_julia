@@ -1,27 +1,31 @@
-include("aes_block_cipher/constants.jl")
-using .constants
+using Distributed
 
-include("aes_block_cipher/aes_key/aes_key.jl")
-using .aes_key
+addprocs(4)
 
-include("aes_block_cipher/state.jl")
-using .state
+@everywhere include("aes_block_cipher/constants.jl")
+@everywhere using .constants
 
-include("aes_block_cipher/aes_block_cipher.jl")
-using .aes_block_cipher
+@everywhere include("aes_block_cipher/aes_key/aes_key.jl")
+@everywhere using .aes_key
+
+@everywhere include("aes_block_cipher/state.jl")
+@everywhere using .state
+
+@everywhere include("aes_block_cipher/aes_block_cipher.jl")
+@everywhere using .aes_block_cipher
 
 
-include("config.jl")
-using .config
+@everywhere include("config.jl")
+@everywhere using .config
 
-include("utils/chunk_reader.jl")
-using .chunk_reader
+@everywhere include("utils/chunk_reader.jl")
+@everywhere using .chunk_reader
 
-include("utils/chunk_writer.jl")
-using .chunk_reader
+@everywhere include("utils/chunk_writer.jl")
+@everywhere using .chunk_reader
 
-include("aes_cipher.jl")
-using .aes_cipher
+@everywhere include("aes_cipher.jl")
+@everywhere using .aes_cipher
 
 BUFFER_SIZE = 10000000
 
