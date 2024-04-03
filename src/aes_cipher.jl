@@ -60,6 +60,9 @@ function cipher_blocks(blocks::Vector{Vector{UInt8}}, chunks_filled::Int, cipher
     expanded_key = cipher_stack.block_cipher.expanded_key
     n_threads = cipher_stack.n_threads
     step = chunks_filled ÷ (n_threads * 8) #spawn 8 jobs per thread
+    if step < chunks_filled
+        step = chunks_filled
+    end
     @threads for i in 0:(chunks_filled ÷ step)-1
         slice = @view blocks[(i*step)+1:(i+1)*step]
         aes_block_cipher.cipher_blocks(slice, expanded_key)
@@ -91,6 +94,9 @@ function decipher_blocks(blocks::Vector{Vector{UInt8}}, chunks_filled::Int, ciph
     inv_expanded_key = cipher_stack.block_cipher.inv_expanded_key
     n_threads = cipher_stack.n_threads
     step = chunks_filled ÷ (n_threads * 8) #spawn 8 jobs per thread
+    if step < chunks_filled
+        step = chunks_filled
+    end
     @threads for i in 0:(chunks_filled ÷ step)-1
         slice = @view blocks[(i*step)+1:(i+1)*step]
         aes_block_cipher.inv_cipher_blocks(slice, inv_expanded_key)
