@@ -120,7 +120,7 @@ function inv_mix_columns(_state::State)
     end
 end
 
-function mix_column(col::AbstractArray{UInt8})
+function mix_column(col::SubArray{UInt8})
     @inbounds begin
         a, b, c, d = col[1], col[2], col[3], col[4]
         
@@ -131,7 +131,7 @@ function mix_column(col::AbstractArray{UInt8})
     end
 end
 
-function inv_mix_column(col::AbstractArray{UInt8})
+function inv_mix_column(col::SubArray{UInt8})
     @inbounds begin
         a, b, c, d = col[1], col[2], col[3], col[4]
         

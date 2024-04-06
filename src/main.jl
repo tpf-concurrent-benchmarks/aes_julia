@@ -23,7 +23,7 @@ using .chunk_reader
 include("aes_cipher.jl")
 using .aes_cipher
 
-BUFFER_SIZE = 10000000
+BUFFER_SIZE = 1000000
 
 function run_cipher(buffer_size::Int)
     env_variables = config.read_config()
