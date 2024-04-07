@@ -34,7 +34,7 @@ function new_cipher_stack(input_path::String, encrypted_path::String, decrypted_
     writer_decipher = chunk_writer.ChunkWriter(decrypted_path, true)
     buffers = Vector{Vector{Vector{UInt8}}}(undef, buffer_amount)
     for i in 1:buffer_amount
-            buffers[i] = [Vector{UInt8}(undef, 16) for i in 1:buffer_size]
+        buffers[i] = [Vector{UInt8}(undef, 16) for i in 1:buffer_size]
     end
     CipherStack(block_cipher, reader_cipher, writer_cipher, reader_decipher, writer_decipher, buffers, buffer_size, n_threads, buffer_amount)
 end
@@ -62,8 +62,8 @@ function delete_cipher_stack(cipher_stack::CipherStack)
 end
 
 function cipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int, chunks_filled::Vector{Int}, expanded_key::AESKey)
-    @threads for i in 1:buffers_filled
-        aes_block_cipher.cipher_blocks(blocks[i][1:chunks_filled[i]], expanded_key)
+    @sync for i in 1:buffers_filled
+        @spawn aes_block_cipher.cipher_blocks(blocks[i][1:chunks_filled[i]], expanded_key)
     end
 end
 
@@ -91,7 +91,7 @@ function process_cipher_blocks(cipher_stack::CipherStack)::Bool
     cipher_blocks(buffers, buffers_filled, chunks_filled_array, cipher_stack.block_cipher.expanded_key)
 
     for i in 1:buffers_filled
-        chunk_writer.write_chunks(writer, buffers[i][1:chunks_filled_array[i]])
+        chunk_writer.write_chunks(writer, buffers[i][1:chunks_filled_array[i]], chunks_filled_array[i])
     end
 
     return eof_flag
@@ -103,8 +103,8 @@ function cipher(cipher_stack::CipherStack)
 end
 
 function decipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int, chunks_filled::Vector{Int}, inv_expanded_key::AESKey)
-    @threads for i in 1:buffers_filled
-        aes_block_cipher.inv_cipher_blocks(blocks[i][1:chunks_filled[i]], inv_expanded_key)
+    @sync for i in 1:buffers_filled
+        @spawn aes_block_cipher.inv_cipher_blocks(blocks[i][1:chunks_filled[i]], inv_expanded_key)
     end
 end
 
@@ -131,7 +131,7 @@ function process_decipher_blocks(cipher_stack::CipherStack)::Bool
     decipher_blocks(buffers, buffers_filled, chunks_filled_array, cipher_stack.block_cipher.inv_expanded_key)
 
     for i in 1:buffers_filled
-        chunk_writer.write_chunks(writer, buffers[i][1:chunks_filled_array[i]])
+        chunk_writer.write_chunks(writer, buffers[i][1:chunks_filled_array[i]], chunks_filled_array[i])
     end
 
     return eof_flag

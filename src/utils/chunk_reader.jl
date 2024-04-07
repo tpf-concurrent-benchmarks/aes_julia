@@ -50,7 +50,7 @@ function fill_chunk(reader::ChunkReader, buffer::Vector{UInt8})::Int
 end
 
 function apply_null_padding(size::Int, buffer::Vector{UInt8})
-    for i in size+1:length(buffer)
+    for i in size+1:16
         buffer[i] = 0
     end
 end

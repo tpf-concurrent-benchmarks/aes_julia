@@ -58,31 +58,62 @@ function apply_substitution(_state::State, sub_box::Vector{UInt8})
     map!((value) -> sub_box[Int(value) + 1], _state, _state)
 end
 
+function my_circshift_1!(A::SubArray{UInt8})
+    temp_2::UInt8 = A[2]
+    temp_4::UInt8 = A[4]
+    A[2] = A[3]
+    A[4] = A[1]
+    A[3] = temp_4
+    A[1] = temp_2
+end
+
+function my_circshift_2!(A::SubArray{UInt8})
+    temp_1::UInt8 = A[1]
+    temp_2::UInt8 = A[2]
+    A[1] = A[3]
+    A[2] = A[4]
+    A[3] = temp_1
+    A[4] = temp_2
+end
+
+function my_circshift_3!(A::SubArray{UInt8})
+    temp_2::UInt8 = A[2]
+    temp_4::UInt8 = A[4]
+    A[2] = A[1]
+    A[4] = A[3]
+    A[1] = temp_4
+    A[3] = temp_2
+end
+
 function shift_rows(_state::State)
-    for i in 1:4
-        col = @view _state[i, :] #this access way is slow, TODO try to find a faster way accessing it [:, i]
-        circshift!(col, i-1)
-    end
+    col = @view _state[2, :]
+    my_circshift_1!(col)
+    col = @view _state[3, :]
+    my_circshift_2!(col)
+    col = @view _state[4, :]
+    my_circshift_3!(col)
 end
 
 function inv_shift_rows(_state::State)
-    for i in 1:4
-        col = @view _state[i, :] #this access way is slow, TODO try to find a faster way accessing it [:, i]
-        circshift!(col, -i+1)
-    end
+    col = @view _state[2, :]
+    my_circshift_3!(col)
+    col = @view _state[3, :]
+    my_circshift_2!(col)
+    col = @view _state[4, :]
+    my_circshift_1!(col)
 end
 
-#there was a minor improvement by using circshift! instead of circshift
-# but it is not recommended for inplace use so if bugs are encontered use this version instead
 # function shift_rows(_state::State)
-#     for i in 1:4
-#         _state[i, :] = circshift(_state[i, :], -i+1)
+#     for i in 2:4
+#         col = @view _state[i, :] #this access way is slow, TODO try to find a faster way accessing it [:, i]
+#         circshift!(col, i-1)
 #     end
 # end
 
 # function inv_shift_rows(_state::State)
-#     for i in 1:4
-#         _state[i, :] = circshift(_state[i, :], i-1)
+#     for i in 2:4
+#         col = @view _state[i, :] #this access way is slow, TODO try to find a faster way accessing it [:, i]
+#         circshift!(col, -i+1)
 #     end
 # end
 
