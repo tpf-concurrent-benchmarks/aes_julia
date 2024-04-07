@@ -117,7 +117,7 @@ end
 #     end
 # end
 
-function add_round_key(_state::State, round_key::AbstractArray{Word})
+function add_round_key(_state::State, round_key::SubArray{Word})
     for i in 1:N_B
         @inbounds byte1, byte2, byte3, byte4 = from_32_to_8(round_key[i])
         _state[1, i] ⊻= byte4
