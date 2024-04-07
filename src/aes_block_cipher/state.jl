@@ -15,13 +15,10 @@ function new_from_data_in(data_in::Vector{UInt8})::State
     return state
 end
 
-function new_from_data_in_with_state(data_in::Vector{UInt8}, state::State)
-    indx = 1
-    for j in 1:4
-        for i in 1:4
-            @inbounds state[i, j] = data_in[indx]
-            indx += 1
-        end
+function new_from_data_in_with_state(data_in::Vector{UInt8}, _state::State)
+    inds = axes(_state, 1)
+    for col = inds, row = inds
+        @inbounds  _state[row, col] = data_in[((col-1) * 4) + row]
     end
 end
 
@@ -47,12 +44,9 @@ end
 
 #julia convert 4 by 4 matrix into 16 element vector in place
 function set_data_out(_state::State, data_out::Vector{UInt8})
-    idx = 1
-    for j in 1:4
-        for i in 1:4
-            @inbounds data_out[idx] = _state[i, j]
-            idx += 1
-        end
+    inds = axes(_state, 1)
+    for col = inds, row = inds
+        @inbounds data_out[((col-1) * 4) + row] = _state[row, col]
     end
 end
 
