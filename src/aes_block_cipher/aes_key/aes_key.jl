@@ -12,21 +12,21 @@ export AESKey
 const CipherKey = NTuple{4 * N_K, UInt8}
 export CipherKey
 
-function new_direct(cipher_key::CipherKey)
+function new_direct(cipher_key::CipherKey)::AESKey
     aes_key = zeros(Word, N_B * (N_R + 1))
     return expand_key(cipher_key, aes_key)
 end
 
-function new_inverse(cipher_key::CipherKey)
+function new_inverse(cipher_key::CipherKey)::AESKey
     aes_key = zeros(Word, N_B * (N_R + 1))
     return inv_expand_key(cipher_key, aes_key)
 end
 
-function rot_word(word::Word)
+function rot_word(word::Word)::Word
     return (word << 8) | (word >> 24)
 end
 
-function get_byte_from_word(word::Word, pos::UInt)
+function get_byte_from_word(word::Word, pos::UInt)::UInt8
     if pos > 3
         throw(ArgumentError("pos must be less than 4"))
     end
@@ -34,7 +34,7 @@ function get_byte_from_word(word::Word, pos::UInt)
     return (word >> (8 * pos)) & 0xFF
 end
 
-function expand_key(cipher_key::CipherKey, aes_key::AESKey)
+function expand_key(cipher_key::CipherKey, aes_key::AESKey)::AESKey
     temp::Word = aes_key[N_K]
     i::UInt8 = 1
     while i <= N_K
@@ -55,7 +55,7 @@ function expand_key(cipher_key::CipherKey, aes_key::AESKey)
     return aes_key
 end
 
-function inv_expand_key(cipher_key::CipherKey, dw::AESKey)
+function inv_expand_key(cipher_key::CipherKey, dw::AESKey)::AESKey
     aes_key = expand_key(cipher_key, dw)
 
     for round in 1:N_R-1
@@ -69,7 +69,7 @@ function inv_expand_key(cipher_key::CipherKey, dw::AESKey)
     return dw
 end
 
-function inv_mix_columns_words(words::Vector{Word})
+function inv_mix_columns_words(words::Vector{Word})::Vector{Word}
     _state = state.new_from_words(words)
     state.inv_mix_columns(_state)
     columns = [big_endian_to_native_bytes(col[1], col[2], col[3], col[4]) for col in eachcol(_state)]

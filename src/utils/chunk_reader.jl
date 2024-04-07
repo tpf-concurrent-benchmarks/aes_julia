@@ -8,11 +8,11 @@ mutable struct ChunkReader
 end
 export ChunkReader
 
-function ChunkReader(path::String, chunk_size::Int, with_padding::Bool)
+function ChunkReader(path::String, chunk_size::Int, with_padding::Bool)::ChunkReader
     return ChunkReader(open(path), chunk_size, with_padding)
 end
 
-function read_chunks(reader::ChunkReader, chunks_amount::Int, buffer::Vector{Vector{UInt8}})
+function read_chunks(reader::ChunkReader, chunks_amount::Int, buffer::Vector{Vector{UInt8}})::Int
     chunks_filled = 0
     while chunks_filled < chunks_amount
         bytes_read = fill_chunk(reader, buffer[chunks_filled+1])
@@ -27,7 +27,7 @@ function read_chunks(reader::ChunkReader, chunks_amount::Int, buffer::Vector{Vec
     return chunks_filled
 end
 
-function fill_chunk(reader::ChunkReader, buffer::Vector{UInt8})
+function fill_chunk(reader::ChunkReader, buffer::Vector{UInt8})::Int
     bytes_read = readbytes!(reader.input, buffer, 16)
     if bytes_read == 0
         if reader.with_padding

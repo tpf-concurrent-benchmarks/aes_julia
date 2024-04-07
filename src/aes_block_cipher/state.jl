@@ -10,7 +10,7 @@ export State
 #WARNING: all posible @inbounds have been tested
 # dont waste time attempting to add more
 
-function new_from_data_in(data_in::Vector{UInt8})
+function new_from_data_in(data_in::Vector{UInt8})::State
     state::State = reshape(data_in, 4, Int(N_B))
     return state
 end
@@ -25,7 +25,7 @@ function new_from_data_in_with_state(data_in::Vector{UInt8}, state::State)
     end
 end
 
-function from_32_to_8(word::Word)
+function from_32_to_8(word::Word)::Tuple{UInt8, UInt8, UInt8, UInt8}
     byte1 = UInt8(word & 0xFF)
     byte2 = UInt8((word >> 8) & 0xFF)
     byte3 = UInt8((word >> 16) & 0xFF)
@@ -33,7 +33,7 @@ function from_32_to_8(word::Word)
     return byte1, byte2, byte3, byte4
 end
 
-function new_from_words(words::Vector{Word})
+function new_from_words(words::Vector{Word})::State
     #this function sets the numbers in big endian
     _state = zeros(UInt8, length(words), 4)  # Preallocate matrix
     

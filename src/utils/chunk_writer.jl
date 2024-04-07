@@ -7,7 +7,7 @@ mutable struct ChunkWriter
 end
 export ChunkWriter
 
-function ChunkWriter(path::String, remove_padding::Bool)
+function ChunkWriter(path::String, remove_padding::Bool)::ChunkWriter
     if remove_padding
         return ChunkWriter(open(path, "w"), write_chunk_without_padding)
     end
@@ -28,7 +28,7 @@ function write_chunk(writer::ChunkWriter, chunk::Vector{UInt8})
     end
 end
 
-function write_chunk_without_padding(output::IO, chunk::Vector{UInt8})
+function write_chunk_without_padding(output::IO, chunk::Vector{UInt8})::Int
     padding_pos = findfirst(==(0), chunk)
     if padding_pos === nothing
         return write(output, chunk)

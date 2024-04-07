@@ -15,14 +15,14 @@ struct AESBlockCipher
 end
 export AESBlockCipher
 
-function new(cipher_key::CipherKey)
+function new(cipher_key::CipherKey)::AESBlockCipher
     expanded_key = aes_key.new_direct(cipher_key)
     inv_expanded_key = aes_key.new_inverse(cipher_key)
 
     return AESBlockCipher(expanded_key, inv_expanded_key)
 end
 
-function to_be_bytes(cypher_key::UInt128)
+function to_be_bytes(cypher_key::UInt128)::Vector{UInt8}
     cypher_key = hton(cypher_key)
     return reinterpret(UInt8, [uint128_integer])
 end

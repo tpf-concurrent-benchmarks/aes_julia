@@ -67,7 +67,7 @@ function cipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::In
     end
 end
 
-function process_cipher_blocks(cipher_stack::CipherStack)
+function process_cipher_blocks(cipher_stack::CipherStack)::Bool
     #this function reads the file a buffer_amount times and then spawns the threads to process input
     buffers_filled = 0
     buffers = cipher_stack.buffers
@@ -77,7 +77,7 @@ function process_cipher_blocks(cipher_stack::CipherStack)
     writer = cipher_stack.writer_cipher
 
     chunks_filled_array = Vector{Int}(undef, buffer_amount)
-    eof_flag = false
+    eof_flag::Bool = false
     for i in 1:buffer_amount
         chunks_filled = chunk_reader.read_chunks(reader, buffer_size, buffers[i])
         buffers_filled += 1
@@ -108,7 +108,7 @@ function decipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::
     end
 end
 
-function process_decipher_blocks(cipher_stack::CipherStack)
+function process_decipher_blocks(cipher_stack::CipherStack)::Bool
     buffers_filled = 0
     buffers = cipher_stack.buffers
     buffer_size = cipher_stack.buffer_size
@@ -117,7 +117,7 @@ function process_decipher_blocks(cipher_stack::CipherStack)
     writer = cipher_stack.writer_decipher
 
     chunks_filled_array = Vector{Int}(undef, buffer_amount)
-    eof_flag = false
+    eof_flag::Bool = false
     for i in 1:buffer_amount
         chunks_filled = chunk_reader.read_chunks(reader, buffer_size, buffers[i])
         buffers_filled += 1
