@@ -63,7 +63,7 @@ end
 
 function cipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int, chunks_filled::Vector{Int}, expanded_key::AESKey)
     @sync for i in 1:buffers_filled
-        @spawn aes_block_cipher.cipher_blocks(blocks[i][1:chunks_filled[i]], expanded_key)
+        @spawn aes_block_cipher.cipher_blocks(blocks[i][1:chunks_filled[i]], expanded_key, chunks_filled[i])
     end
 end
 
@@ -104,7 +104,7 @@ end
 
 function decipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int, chunks_filled::Vector{Int}, inv_expanded_key::AESKey)
     @sync for i in 1:buffers_filled
-        @spawn aes_block_cipher.inv_cipher_blocks(blocks[i][1:chunks_filled[i]], inv_expanded_key)
+        @spawn aes_block_cipher.inv_cipher_blocks(blocks[i][1:chunks_filled[i]], inv_expanded_key, chunks_filled[i])
     end
 end
 

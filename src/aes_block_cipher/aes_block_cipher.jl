@@ -32,9 +32,9 @@ function new_u128(cypher_key::UInt128)
     return new(cypher_key)
 end
 
-function cipher_blocks(blocks::Vector{Vector{UInt8}}, expanded_key::AESKey)
+function cipher_blocks(blocks::Vector{Vector{UInt8}}, expanded_key::AESKey, blocks_size::Int)
     _state::State = zeros(UInt8, 4, 4)
-    @simd for i in eachindex(blocks)
+    @simd for i in 1:blocks_size
         @inbounds cipher_block(expanded_key, blocks[i], _state)
     end
 end
@@ -57,9 +57,9 @@ function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8}, _state::Stat
     state.set_data_out(_state, data_in)
 end
 
-function inv_cipher_blocks(blocks::Vector{Vector{UInt8}}, inv_expanded_key::AESKey)
+function inv_cipher_blocks(blocks::Vector{Vector{UInt8}}, inv_expanded_key::AESKey, blocks_size::Int)
     _state::State = zeros(UInt8, 4, 4)
-    @simd for i in eachindex(blocks)
+    @simd for i in 1:blocks_size
         @inbounds inv_cipher_block(inv_expanded_key, blocks[i], _state)
     end
 end
