@@ -3,17 +3,13 @@ module state
 include("constants.jl")
 using .constants
 
+
 #make state a reference to matrix type
 const State = Matrix{UInt8}
 export State
 
 #WARNING: all posible @inbounds have been tested
 # dont waste time attempting to add more
-
-function new_from_data_in(data_in::Vector{UInt8})::State
-    state::State = reshape(data_in, 4, Int(N_B))
-    return state
-end
 
 function new_from_data_in_with_state(data_in::Vector{UInt8}, _state::State)
     inds = axes(_state, 1)
@@ -64,14 +60,14 @@ end
 
 function shift_rows(_state::State)
     for i in 1:4
-        col = @view _state[i, :]
+        col = @view _state[i, :] #this access way is slow, TODO try to find a faster way accessing it [:, i]
         circshift!(col, i-1)
     end
 end
 
 function inv_shift_rows(_state::State)
     for i in 1:4
-        col = @view _state[i, :]
+        col = @view _state[i, :] #this access way is slow, TODO try to find a faster way accessing it [:, i]
         circshift!(col, -i+1)
     end
 end

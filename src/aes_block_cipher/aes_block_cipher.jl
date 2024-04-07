@@ -34,7 +34,7 @@ end
 
 function cipher_blocks(blocks::Vector{Vector{UInt8}}, expanded_key::AESKey)
     _state::State = zeros(UInt8, 4, 4)
-    for i in eachindex(blocks)
+    @simd for i in eachindex(blocks)
         @inbounds cipher_block(expanded_key, blocks[i], _state)
     end
 end
@@ -59,7 +59,7 @@ end
 
 function inv_cipher_blocks(blocks::Vector{Vector{UInt8}}, inv_expanded_key::AESKey)
     _state::State = zeros(UInt8, 4, 4)
-    for i in eachindex(blocks)
+    @simd for i in eachindex(blocks)
         @inbounds inv_cipher_block(inv_expanded_key, blocks[i], _state)
     end
 end
