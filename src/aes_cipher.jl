@@ -25,8 +25,8 @@ struct CipherStack
     buffer_amount::Int
 end
 
-function new_cipher_stack(input_path::String, encrypted_path::String, decrypted_path::String, cipher_key::CipherKey, buffer_size::Int, n_threads::Int)
-    buffer_amount = n_threads * 1
+function new_cipher_stack(input_path::String, encrypted_path::String, decrypted_path::String, cipher_key::CipherKey, buffer_size::Int, n_threads::Int, task_per_thread::Int)::CipherStack
+    buffer_amount = n_threads * task_per_thread
     block_cipher = aes_block_cipher.new(cipher_key)
     reader_cipher = chunk_reader.ChunkReader(input_path, 16, true)
     reader_decipher = chunk_reader.ChunkReader(encrypted_path, 16, false)
