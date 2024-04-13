@@ -38,7 +38,7 @@ function expand_key(cipher_key::CipherKey, aes_key::AESKey)::AESKey
     temp::Word = aes_key[N_K]
     i::UInt8 = 1
     while i <= N_K
-        aes_key[i] = big_endian_to_native(cipher_key[(4 * (i - 1) + 1):(4 * i)])#Word(cipher_key[(4 * (i - 1) + 1):(4 * i)] |> be32)
+        aes_key[i] = big_endian_to_native(cipher_key[(4 * (i - 1) + 1):(4 * i)])
         i += 1
     end
     i = N_K + 1
@@ -119,4 +119,4 @@ function sub_word(word::UInt32)::UInt32
     return result
 end
 
-end # module aes_key
+end

@@ -25,7 +25,10 @@ struct CipherStack
     buffer_amount::Int
 end
 
-function new_cipher_stack(input_path::String, encrypted_path::String, decrypted_path::String, cipher_key::CipherKey, buffer_size::Int, n_threads::Int, task_per_thread::Int)::CipherStack
+function new_cipher_stack(input_path::String, encrypted_path::String,
+                        decrypted_path::String, cipher_key::CipherKey, buffer_size::Int,
+                        n_threads::Int, task_per_thread::Int)::CipherStack
+
     buffer_amount = n_threads * task_per_thread
     block_cipher = aes_block_cipher.new(cipher_key)
     reader_cipher = chunk_reader.ChunkReader(input_path, 16, true)
@@ -36,7 +39,9 @@ function new_cipher_stack(input_path::String, encrypted_path::String, decrypted_
     for i in 1:buffer_amount
         buffers[i] = [Vector{UInt8}(undef, 16) for i in 1:buffer_size]
     end
-    CipherStack(block_cipher, reader_cipher, writer_cipher, reader_decipher, writer_decipher, buffers, buffer_size, n_threads, buffer_amount)
+    CipherStack(block_cipher, reader_cipher, writer_cipher,
+                reader_decipher, writer_decipher, buffers, buffer_size, n_threads,
+                buffer_amount)
 end
 
 function reset_files(cipher_stack::CipherStack)
@@ -61,23 +66,29 @@ function delete_cipher_stack(cipher_stack::CipherStack)
     close(cipher_stack.writer_decipher.output)
 end
 
-function cipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int, chunks_filled::Vector{Int}, expanded_key::AESKey)
+function cipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int,
+                        chunks_filled::Vector{Int}, expanded_key::AESKey)
+
     @sync for i in 1:buffers_filled
-        @spawn aes_block_cipher.cipher_blocks(blocks[i][1:chunks_filled[i]], expanded_key, chunks_filled[i])
+        @spawn aes_block_cipher.cipher_blocks(blocks[i][1:chunks_filled[i]],
+                                            expanded_key, chunks_filled[i])
     end
 end
 
 function process_cipher_blocks(cipher_stack::CipherStack)::Bool
-    #this function reads the file a buffer_amount times and then spawns the threads to process input
+    # this function reads the file a buffer_amount times and 
+    #  then spawns the threads to process input
     buffers_filled = 0
     buffers = cipher_stack.buffers
     buffer_size = cipher_stack.buffer_size
     buffer_amount = cipher_stack.buffer_amount
+
     reader = cipher_stack.reader_cipher
     writer = cipher_stack.writer_cipher
 
     chunks_filled_array = Vector{Int}(undef, buffer_amount)
     eof_flag::Bool = false
+
     for i in 1:buffer_amount
         chunks_filled = chunk_reader.read_chunks(reader, buffer_size, buffers[i])
         buffers_filled += 1
@@ -88,10 +99,12 @@ function process_cipher_blocks(cipher_stack::CipherStack)::Bool
         end
     end
 
-    cipher_blocks(buffers, buffers_filled, chunks_filled_array, cipher_stack.block_cipher.expanded_key)
+    cipher_blocks(buffers, buffers_filled, chunks_filled_array,
+                    cipher_stack.block_cipher.expanded_key)
 
     for i in 1:buffers_filled
-        chunk_writer.write_chunks(writer, buffers[i][1:chunks_filled_array[i]], chunks_filled_array[i])
+        chunk_writer.write_chunks(writer, buffers[i][1:chunks_filled_array[i]],
+                                  chunks_filled_array[i])
     end
 
     return eof_flag
@@ -102,9 +115,12 @@ function cipher(cipher_stack::CipherStack)
     end
 end
 
-function decipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int, chunks_filled::Vector{Int}, inv_expanded_key::AESKey)
+function decipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int,
+                         chunks_filled::Vector{Int}, inv_expanded_key::AESKey)
+
     @sync for i in 1:buffers_filled
-        @spawn aes_block_cipher.inv_cipher_blocks(blocks[i][1:chunks_filled[i]], inv_expanded_key, chunks_filled[i])
+        @spawn aes_block_cipher.inv_cipher_blocks(blocks[i][1:chunks_filled[i]],
+                                                inv_expanded_key, chunks_filled[i])
     end
 end
 
@@ -113,11 +129,13 @@ function process_decipher_blocks(cipher_stack::CipherStack)::Bool
     buffers = cipher_stack.buffers
     buffer_size = cipher_stack.buffer_size
     buffer_amount = cipher_stack.buffer_amount
+
     reader = cipher_stack.reader_decipher
     writer = cipher_stack.writer_decipher
 
     chunks_filled_array = Vector{Int}(undef, buffer_amount)
     eof_flag::Bool = false
+
     for i in 1:buffer_amount
         chunks_filled = chunk_reader.read_chunks(reader, buffer_size, buffers[i])
         buffers_filled += 1
@@ -128,10 +146,12 @@ function process_decipher_blocks(cipher_stack::CipherStack)::Bool
         end
     end
 
-    decipher_blocks(buffers, buffers_filled, chunks_filled_array, cipher_stack.block_cipher.inv_expanded_key)
+    decipher_blocks(buffers, buffers_filled, chunks_filled_array,
+                    cipher_stack.block_cipher.inv_expanded_key)
 
     for i in 1:buffers_filled
-        chunk_writer.write_chunks(writer, buffers[i][1:chunks_filled_array[i]], chunks_filled_array[i])
+        chunk_writer.write_chunks(writer, buffers[i][1:chunks_filled_array[i]],
+                                  chunks_filled_array[i])
     end
 
     return eof_flag

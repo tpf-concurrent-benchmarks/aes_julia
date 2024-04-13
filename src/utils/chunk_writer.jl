@@ -14,7 +14,8 @@ function ChunkWriter(path::String, remove_padding::Bool)::ChunkWriter
     return ChunkWriter(open(path, "w"), write)
 end
 
-function write_chunks(writer::ChunkWriter, chunks::Vector{Vector{UInt8}}, chunks_amount::Int)
+function write_chunks(writer::ChunkWriter, chunks::Vector{Vector{UInt8}},
+                    chunks_amount::Int)
     for i in 1:chunks_amount
         write_chunk(writer, chunks[i])
     end

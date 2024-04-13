@@ -22,8 +22,8 @@ using .chunk_reader
 include("aes_cipher.jl")
 using .aes_cipher
 
-include("StatsLogger.jl")
-using .StatsLogger
+# include("StatsLogger.jl")
+# using .StatsLogger
 
 # using Pkg
 # Pkg.add("ProfileView")

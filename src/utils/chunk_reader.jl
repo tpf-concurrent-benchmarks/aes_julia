@@ -12,7 +12,8 @@ function ChunkReader(path::String, chunk_size::Int, with_padding::Bool)::ChunkRe
     return ChunkReader(open(path), chunk_size, with_padding)
 end
 
-function read_chunks(reader::ChunkReader, chunks_amount::Int, buffer::Vector{Vector{UInt8}})::Int
+function read_chunks(reader::ChunkReader, chunks_amount::Int,
+                    buffer::Vector{Vector{UInt8}})::Int
     chunks_filled = 0
     while chunks_filled < chunks_amount
         bytes_read = fill_chunk(reader, buffer[chunks_filled+1])

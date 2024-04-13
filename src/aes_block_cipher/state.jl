@@ -103,20 +103,6 @@ function inv_shift_rows(_state::State)
     my_circshift_1!(col)
 end
 
-# function shift_rows(_state::State)
-#     for i in 2:4
-#         col = @view _state[i, :] #this access way is slow, TODO try to find a faster way accessing it [:, i]
-#         circshift!(col, i-1)
-#     end
-# end
-
-# function inv_shift_rows(_state::State)
-#     for i in 2:4
-#         col = @view _state[i, :] #this access way is slow, TODO try to find a faster way accessing it [:, i]
-#         circshift!(col, -i+1)
-#     end
-# end
-
 function add_round_key(_state::State, round_key::SubArray{Word})
     for i in 1:N_B
         @inbounds byte1, byte2, byte3, byte4 = from_32_to_8(round_key[i])
