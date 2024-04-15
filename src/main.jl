@@ -1,29 +1,14 @@
-include("aes_block_cipher/constants.jl")
-using .constants
-
 include("aes_block_cipher/aes_key/aes_key.jl")
 using .aes_key
-
-include("aes_block_cipher/state.jl")
-using .state
-
-include("aes_block_cipher/aes_block_cipher.jl")
-using .aes_block_cipher
 
 include("config.jl")
 using .config
 
-include("utils/chunk_reader.jl")
-using .chunk_reader
-
-include("utils/chunk_writer.jl")
-using .chunk_reader
-
 include("aes_cipher.jl")
 using .aes_cipher
 
-# include("StatsLogger.jl")
-# using .StatsLogger
+include("StatsLogger.jl")
+using .StatsLogger
 
 # using Pkg
 # Pkg.add("ProfileView")

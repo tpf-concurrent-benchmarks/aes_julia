@@ -11,7 +11,7 @@ export State
 #WARNING: all posible @inbounds have been tested
 # dont waste time attempting to add more
 
-function new_from_data_in_with_state(data_in::Vector{UInt8}, _state::State)
+function new_from_data_in_with_state!(data_in::Vector{UInt8}, _state::State)
     inds = axes(_state, 1)
     for col = inds, row = inds
         @inbounds  _state[row, col] = data_in[((col-1) * 4) + row]
@@ -39,22 +39,22 @@ function new_from_words(words::Vector{Word})::State
 end
 
 #julia convert 4 by 4 matrix into 16 element vector in place
-function set_data_out(_state::State, data_out::Vector{UInt8})
+function set_data_out!(_state::State, data_out::Vector{UInt8})
     inds = axes(_state, 1)
     for col = inds, row = inds
         @inbounds data_out[((col-1) * 4) + row] = _state[row, col]
     end
 end
 
-function sub_bytes(_state::State)
-    apply_substitution(_state, S_BOX)
+function sub_bytes!(_state::State)
+    apply_substitution!(_state, S_BOX)
 end
 
-function inv_sub_bytes(_state::State)
-    apply_substitution(_state, INV_S_BOX)
+function inv_sub_bytes!(_state::State)
+    apply_substitution!(_state, INV_S_BOX)
 end
 
-function apply_substitution(_state::State, sub_box::Vector{UInt8})
+function apply_substitution!(_state::State, sub_box::Vector{UInt8})
     map!((value) -> sub_box[Int(value) + 1], _state, _state)
 end
 
@@ -85,7 +85,7 @@ function my_circshift_3!(A::SubArray{UInt8})
     A[3] = temp_2
 end
 
-function shift_rows(_state::State)
+function shift_rows!(_state::State)
     col = @view _state[2, :]
     my_circshift_1!(col)
     col = @view _state[3, :]
@@ -94,7 +94,7 @@ function shift_rows(_state::State)
     my_circshift_3!(col)
 end
 
-function inv_shift_rows(_state::State)
+function inv_shift_rows!(_state::State)
     col = @view _state[2, :]
     my_circshift_3!(col)
     col = @view _state[3, :]
@@ -103,7 +103,7 @@ function inv_shift_rows(_state::State)
     my_circshift_1!(col)
 end
 
-function add_round_key(_state::State, round_key::SubArray{Word})
+function add_round_key!(_state::State, round_key::SubArray{Word})
     for i in 1:N_B
         @inbounds byte1, byte2, byte3, byte4 = from_32_to_8(round_key[i])
         _state[1, i] ⊻= byte4
@@ -113,21 +113,21 @@ function add_round_key(_state::State, round_key::SubArray{Word})
     end
 end
 
-function mix_columns(_state::State)
+function mix_columns!(_state::State)
     for i in 1:N_B
         @inbounds col = @view _state[:, i]
-        mix_column(col)
+        mix_column!(col)
     end
 end
 
-function inv_mix_columns(_state::State)
+function inv_mix_columns!(_state::State)
     for i in 1:N_B
         @inbounds col = @view _state[:, i]
-        inv_mix_column(col)
+        inv_mix_column!(col)
     end
 end
 
-function mix_column(col::SubArray{UInt8})
+function mix_column!(col::SubArray{UInt8})
     @inbounds begin
         a, b, c, d = col[1], col[2], col[3], col[4]
         
@@ -138,7 +138,7 @@ function mix_column(col::SubArray{UInt8})
     end
 end
 
-function inv_mix_column(col::SubArray{UInt8})
+function inv_mix_column!(col::SubArray{UInt8})
     @inbounds begin
         a, b, c, d = col[1], col[2], col[3], col[4]
         

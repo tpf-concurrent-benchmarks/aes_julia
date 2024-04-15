@@ -66,7 +66,7 @@ function delete_cipher_stack(cipher_stack::CipherStack)
     close(cipher_stack.writer_decipher.output)
 end
 
-function cipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int,
+function cipher_blocks!(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int,
                         chunks_filled::Vector{Int}, expanded_key::AESKey)
 
     @sync for i in 1:buffers_filled
@@ -90,7 +90,7 @@ function process_cipher_blocks(cipher_stack::CipherStack)::Bool
     eof_flag::Bool = false
 
     for i in 1:buffer_amount
-        chunks_filled = chunk_reader.read_chunks(reader, buffer_size, buffers[i])
+        chunks_filled = chunk_reader.read_chunks!(reader, buffer_size, buffers[i])
         buffers_filled += 1
         chunks_filled_array[i] = chunks_filled
         if chunks_filled == 0
@@ -99,7 +99,7 @@ function process_cipher_blocks(cipher_stack::CipherStack)::Bool
         end
     end
 
-    cipher_blocks(buffers, buffers_filled, chunks_filled_array,
+    cipher_blocks!(buffers, buffers_filled, chunks_filled_array,
                     cipher_stack.block_cipher.expanded_key)
 
     for i in 1:buffers_filled
@@ -115,7 +115,7 @@ function cipher(cipher_stack::CipherStack)
     end
 end
 
-function decipher_blocks(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int,
+function decipher_blocks!(blocks::Vector{Vector{Vector{UInt8}}}, buffers_filled::Int,
                          chunks_filled::Vector{Int}, inv_expanded_key::AESKey)
 
     @sync for i in 1:buffers_filled
@@ -137,7 +137,7 @@ function process_decipher_blocks(cipher_stack::CipherStack)::Bool
     eof_flag::Bool = false
 
     for i in 1:buffer_amount
-        chunks_filled = chunk_reader.read_chunks(reader, buffer_size, buffers[i])
+        chunks_filled = chunk_reader.read_chunks!(reader, buffer_size, buffers[i])
         buffers_filled += 1
         chunks_filled_array[i] = chunks_filled
         if chunks_filled == 0
@@ -146,7 +146,7 @@ function process_decipher_blocks(cipher_stack::CipherStack)::Bool
         end
     end
 
-    decipher_blocks(buffers, buffers_filled, chunks_filled_array,
+    decipher_blocks!(buffers, buffers_filled, chunks_filled_array,
                     cipher_stack.block_cipher.inv_expanded_key)
 
     for i in 1:buffers_filled

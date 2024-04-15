@@ -42,24 +42,24 @@ end
 
 function cipher_block(expanded_key::AESKey, data_in::Vector{UInt8}, _state::State)
 
-    state.new_from_data_in_with_state(data_in, _state)
+    state.new_from_data_in_with_state!(data_in, _state)
 
     key_view = @view expanded_key[1:N_B]
-    state.add_round_key(_state, key_view)
+    state.add_round_key!(_state, key_view)
 
     for round in 1:N_R-1
-        state.sub_bytes(_state)
-        state.shift_rows(_state)
-        state.mix_columns(_state)
+        state.sub_bytes!(_state)
+        state.shift_rows!(_state)
+        state.mix_columns!(_state)
         key_view = @view expanded_key[(round*N_B)+1:((round+1)*N_B)]
-        state.add_round_key(_state, key_view)
+        state.add_round_key!(_state, key_view)
     end
-    state.sub_bytes(_state)
-    state.shift_rows(_state)
+    state.sub_bytes!(_state)
+    state.shift_rows!(_state)
     key_view = @view expanded_key[(N_R*N_B)+1:((N_R+1)*N_B)]
-    state.add_round_key(_state, key_view)
+    state.add_round_key!(_state, key_view)
 
-    state.set_data_out(_state, data_in)
+    state.set_data_out!(_state, data_in)
 end
 
 function inv_cipher_blocks(blocks::Vector{Vector{UInt8}}, inv_expanded_key::AESKey,
@@ -72,24 +72,24 @@ end
 
 function inv_cipher_block(inv_expanded_key::AESKey, data_in::Vector{UInt8}, _state::State)
 
-    state.new_from_data_in_with_state(data_in, _state)
+    state.new_from_data_in_with_state!(data_in, _state)
     
     key_view = @view inv_expanded_key[(N_R*N_B)+1:((N_R+1)*N_B)]
-    state.add_round_key(_state, key_view)
+    state.add_round_key!(_state, key_view)
     
     for round in reverse(1:N_R-1)
-        state.inv_sub_bytes(_state)
-        state.inv_shift_rows(_state)
-        state.inv_mix_columns(_state)
+        state.inv_sub_bytes!(_state)
+        state.inv_shift_rows!(_state)
+        state.inv_mix_columns!(_state)
         key_view = @view inv_expanded_key[(round*N_B)+1:((round+1)*N_B)]
-        state.add_round_key(_state, key_view)
+        state.add_round_key!(_state, key_view)
     end
-    state.inv_sub_bytes(_state)
-    state.inv_shift_rows(_state)
+    state.inv_sub_bytes!(_state)
+    state.inv_shift_rows!(_state)
     key_view = @view inv_expanded_key[1:N_B]
-    state.add_round_key(_state, key_view)
+    state.add_round_key!(_state, key_view)
 
-    state.set_data_out(_state, data_in)
+    state.set_data_out!(_state, data_in)
 end
 
 end

@@ -71,7 +71,7 @@ end
 
 function inv_mix_columns_words(words::Vector{Word})::Vector{Word}
     _state = state.new_from_words(words)
-    state.inv_mix_columns(_state)
+    state.inv_mix_columns!(_state)
     columns = [big_endian_to_native_bytes(col[1], col[2], col[3], col[4]) for col in eachcol(_state)]
     return columns
 end
