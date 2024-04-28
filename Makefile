@@ -3,6 +3,12 @@ build:
 	docker build -t aes_julia_image -f ./Dockerfile .
 .PHONY: build
 
+dummy_file:
+	mkdir -p data
+	echo "Hello World!" > data/input.txt
+	touch data/encrypted.txt
+	touch data/decrypted.txt
+
 deploy: remove
 	mkdir -p graphite
 	mkdir -p grafana_config
@@ -20,3 +26,6 @@ remove:
 aes_bash:
 	docker exec -it $(shell docker ps -q -f name=aes_julia_app) bash
 .PHONY: worker_bash
+
+logs:
+	docker service logs aes_julia_app
